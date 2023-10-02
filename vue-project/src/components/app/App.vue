@@ -2,66 +2,73 @@
   <div class="app font-monospace">
 
     <div class="content">
+      <!-- <PrimaryButton @click="FetchApiviews"> button</PrimaryButton> -->
       <AppInfo  :allmoviecount="movies.length" :favoritemovies="movies.filter(c=>c.favorite).length"/>
       <div class="search-panel">
       <Search  :updatetermhandler="updatetermhandler"/>
     </div>
     <AppFilter :updatefilterhandler="updatefilterhandler"/>
-    <MovieList :movies="onFilterArray(onSearchList(movies, term), filter)"
-    @onToggle="onToggleHendler"
-    @onRemove="OnRemoveList"
+    <Box v-if="!movies.length && !isloading"> Kinolar yo'q  </Box>
+    <div v-else-if="isloading" class="tex-aligin-center">
+        <div class="spinner-border" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
 
-    />
-    <MovieAddFrom @createmoview="createmoview"/>
+    <MovieList :movies="onFilterArray(onSearchList(movies, term), filter)" v-else
+    @onToggle="onToggleHendler"
+    @onRemove="OnRemoveList" />
+    <Box class="d-flex justify-content-center">
+      <nav aria-label="Page navigation example">
+   <ul  class="pagination">
+  
+    <li class="page-item" v-for="pageNumber in totalPage" :class="{'active': pageNumber==page}" 
+    :key="pageNumber" @click="pageChangehendler(pageNumber)"> <span class="page-link"> {{ pageNumber }}</span></li>
+    
+ 
+  </ul>
+</nav>
+</Box>
+    
+    <div v-if="filter=='all'"> 
+      <MovieAddFrom @createmoview="createmoview"/>
+    </div>
+    <div v-else>
+       
+    </div>
+    
     </div>
 
    
   </div>
 </template>
 <script>
-
+import axios from "axios"
 import AppInfo from "@/components/appInfo/AppInfo.vue"
 import Search from "@/components/search-panel/Search.vue"
 import AppFilter from "@/components/filter/AppFilter.vue"
 import MovieList from "@/components/movie-list/MovieList.vue"
 import MovieAddFrom from "../movie-form/MovieAddForm.vue"
+import Box from "../../ui-componenents/Box.vue"
+
 export default {
     components : {
-      AppInfo,
-      Search,
-      AppFilter,
-      MovieList,
-      MovieAddFrom,
-    },
+    AppInfo,
+    Search,
+    AppFilter,
+    MovieList,
+    MovieAddFrom,
+    Box
+},
     data() {
        return {
-            movies: [
-                {
-                    name: 'uzbek kino',
-                    viewers: 222,
-                    favorite: true,
-                    like:true,
-                    id: 1,
-
-                },
-                {
-                    name: 'turk kino',
-                    viewers: 444,
-                    favorite: false,
-                    like: false,
-                    id:2,
-
-                },
-                {
-                    name: 'hind kino',
-                    viewers: 666,
-                    favorite: false,
-                    like: false,
-                    id:3,
-                }
-        ],
+        movies: [],
         term: '',
         filter: 'all',
+        isloading: false,
+        limit:10,
+        page:1,
+        totalPage:0,
       
        }
       
@@ -101,6 +108,7 @@ export default {
         return arr
      }        
       },
+     
 
     
   
@@ -109,9 +117,56 @@ export default {
     },
     updatefilterhandler(filter) {
       this.filter = filter
-    }
+    },
+    async FetchApiviews() {
+      try{
+        this.isloading = true
+        setTimeout( async()=>{
+          const response = await axios.get("https://jsonplaceholder.typicode.com/posts", {
+            params: {
+              _limit:this.limit,
+              _page:this.page,
+            }
+          })
+          console.log(response)
+         const arry = response.data.map(item => ({
+          id: item.id,
+          name: item.title,
+          viewers: item.id*10,
+          favorite: false,
+          like: false,
+        
+
+         })
+         
+        
+         )
+         this.totalPage = Math.ceil(response.headers['x-total-count']/this.limit) 
+         console.log(this.totalPage)
+         this.movies = arry
+         this.isloading=false
+        }, 1000)
+
+      
+         
+      }
+        catch (e) {
+          alert(e.message)
+        }
+    
+     
+    },
+    pageChangehendler(page) {
+        this.page = page
+        this.FetchApiviews()
+
+      },
+
+  }, 
   
-  }
+  mounted() {
+        this.FetchApiviews()
+      },   
 
 }
    
@@ -136,4 +191,12 @@ export default {
     border-radius: 4px;
     box-shadow: 15px 15px 15px rgba(0, 0, 0, 0.15);
   }
+
+.tex-aligin-center {
+  text-align: center;
+  margin: 10px;
+  padding-top: 30px;
+}
+
+
 </style>

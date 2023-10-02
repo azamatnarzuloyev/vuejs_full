@@ -2,14 +2,19 @@
     <div class="movie-add-form">
         <h3>Yangi kino qoshish</h3>
         <form action="" class="add-form d-flex" @submit.prevent>
-            <input type="text" @input="name=$event.target.value" :value="name" class="form-control new-movie-label" placeholder="Qanday kino">
-            <input type="number" @input="viewers=$event.target.value" :value="viewers" class="form-control new-movie-label mx-2" placeholder="Nechi marotaba korilgan">
+            <Input class="new-movie-label" v-model="name" placeholder="Qanday kino "></Input>
+            <!-- <input type="text" @input="name=$event.target.value" :value="name" class="form-control new-movie-label" placeholder="Qanday kino"> -->
+            <Input type="number" class="new-movie-label" v-model="viewers" placeholder="Kinolar soni"></Input>
+            <!-- <input type="number" @input="viewers=$event.target.value" :value="viewers" class="form-control new-movie-label mx-2" placeholder="Nechi marotaba korilgan"> -->
 
-            <button class="btn btn-outline-dark mx-3" type="submit" @click="addmoview">Qoshish</button>
+            <PrimaryButton class="btn-outline-dark mx-3" type="submit" @click="addmoview">Qoshish</PrimaryButton>
         </form>
     </div>
 </template>
 <script>
+
+
+
 export default {
     data() {
         return {
@@ -17,6 +22,7 @@ export default {
             viewers: "",
         }
     },
+
     methods: {
         addmoview() {
             if(!this.name || !this.viewers) return
@@ -33,7 +39,8 @@ export default {
         },
      
 
-        }
+        },
+  
         
     }
 </script>
